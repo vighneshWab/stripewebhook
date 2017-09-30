@@ -1,0 +1,39 @@
+{
+  "name": "stripewebhook",
+  "version": "1.0.0",
+  "description": "stripe apis for webhooks",
+  "main": "server.js",
+  "scripts": {  
+    "start": "node server.js",
+    "test": "npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vighneshWab/stripewebhook.git"
+  },
+  "devDependencies": {
+    "nodemon": "^1.10.2"
+  },
+  "keywords": [
+    "stripe",
+    "webhook",
+    "example",
+    "demo",
+    "step",
+    "by",
+    "step"
+  ],
+  "author": "Vighnesh Dandekar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vighneshWab/stripewebhook/issues"
+  },
+  "homepage": "https://github.com/vighneshWab/stripewebhook#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "express": "^4.15.5",
+    "nodemon": "^1.12.1",
+    "stripe": "^5.0.0"
+  }
+}
