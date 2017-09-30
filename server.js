@@ -3,6 +3,8 @@
 
 var express = require("express");
 var bodyParser = require("body-parser");
+var stripe = require('stripe')("sk_test_o582mFkZFmS94mvRLtlhWcFx");
+
 var app = express();
 app.use(bodyParser.json());
 
