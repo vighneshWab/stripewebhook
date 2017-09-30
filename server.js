@@ -183,10 +183,9 @@ app.post('/invoice_payment_successed', bodyParser, function (req, res) {
 });
 
 
-app.post('/stripe-webhook', function (request, response) {
-    response.send({'event called':request.body.type,'response rescived':request.body.data.object});
-    // if (request.body.type === 'customer.deleted') {
-    //     console.log(request.body.data.object);
-    // }
-    // response.send('OK');
+app.post('/stripe-webhook', bodyParser,function (request, response) {
+    if (request.body.type === 'customer.deleted') {
+        console.log(request.body.data.object);
+    }
+    response.send('OK');
 });
