@@ -61,3 +61,123 @@ app.post('/customer', bodyParser, function (req, res) {
 
     });
 });
+
+
+app.post('/customer_seller', bodyParser, function (req, res) {
+    console.log('customer_seller', JSON.stringify(req.body))
+    stripe.customers.create({
+        email: req.body.email,
+        description: "seller created",
+        source: req.body.source
+    }, function (err, success) {
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            res.send({ 'status': true, "success": success });
+        }
+
+        // asynchronously called
+    });
+});
+
+app.post('/plans', bodyParser, function (req, res) {
+    console.log('plans', JSON.stringify(req.body))
+    stripe.plans.create({
+        name: req.body.data.UserRole,
+        id: req.body.id,
+        interval: "month",
+        currency: "usd",
+        amount: req.body.data.price,
+    }, function (err, success) {
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
+
+app.post('/sources', bodyParser, function (req, res) {
+    console.log('change', JSON.stringify(req.body))
+    stripe.sources.create({
+        type: 'card',
+        amount: 0,
+        currency: 'aud',
+        owner: {
+            email: req.body.email,
+            name: req.body.userName
+        }
+    }, function (err, source) {
+        if (err) {
+            res.send(err);
+            res.send({ "err": err })
+
+        }
+        if (source) {
+            res.send(source);
+            res.send({ "source": source })
+        }
+
+        // asynchronously called
+    });
+});
+
+
+app.post('/subscription', bodyParser, function (req, res) {
+    console.log('subscription', JSON.stringify(req.body))
+    stripe.subscriptions.create({
+        customer: req.body.customer,
+        items: [
+            {
+                plan: req.body.plan,
+            },
+        ],
+    }, function (err, success) {
+
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
+
+app.post('/trial_subscription', bodyParser, function (req, res) {
+    console.log('trial_subscription', JSON.stringify(req.body))
+
+    stripe.subscriptions.create({
+        customer: req.body.customer,
+        trial_period_days: 30,
+        items: [
+            {
+                plan: req.body.plan,
+            },
+
+        ],
+    }, function (err, success) {
+
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
+
+
+// invoice_payment_successed
+
+app.post('/invoice_payment_successed', bodyParser, function (req, res) {
+    const endpointSecret = "whsec_TLjtDyPMwnyiZM6CObp4cPly7bSjTuSg";
+
+    let sig = req.headers["stripe-signature"];
+    let event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+
+    console.log('invoice_payment_successed', JSON.stringify(req.body))
+    res.json({ received: true });
+
+});
