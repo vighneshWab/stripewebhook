@@ -181,3 +181,12 @@ app.post('/invoice_payment_successed', bodyParser, function (req, res) {
     res.json({ received: true });
 
 });
+
+
+app.post('/stripe-webhook', function (request, response) {
+    console.log(request.body)
+    if (request.body.type === 'customer.deleted') {
+        console.log(request.body.data.object);
+    }
+    response.send('OK');
+});
