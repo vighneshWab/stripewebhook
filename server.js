@@ -4,6 +4,7 @@ var express = require("express");
 var bodyParser = require('body-parser').json();
 
 var stripe = require('stripe')("sk_test_o582mFkZFmS94mvRLtlhWcFx");
+var Promise = require('promise');
 // stripe.setTimeout(20000);
 
 var app = express();
@@ -183,18 +184,14 @@ app.post('/stripe-webhook', bodyParser, function (request, response) {
             break;
 
         case 'customer.subscription.trial_will_end':
+            sendmail(request.body).then(function (resolve) {
+                response.send({'response':request.body})
+            }, function (reject) {
+                response.send('error while sending email')
 
-
-            sendemail(request);
-
-
-          
-
+            })
             break;
-
         default:
-
-
 
             break;
 
@@ -206,8 +203,20 @@ app.post('/stripe-webhook', bodyParser, function (request, response) {
 
 
 
+let sendmail = function (data) {
+    return new Promise(function (resolve, reject) {
+        var emailSend = true;
+        if (emailSend) {
+            resolve('email send');
+        } else {
+            reject('error while sending email');
+        }
+    })
 
-function sendemail(data) {
 
-    response.send({"email":"kindly check you email id","data":data});
+
 }
+
+
+
+
