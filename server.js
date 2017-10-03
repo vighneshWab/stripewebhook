@@ -5,18 +5,23 @@ var bodyParser = require('body-parser').json();
 
 var stripe = require('stripe')("sk_test_o582mFkZFmS94mvRLtlhWcFx");
 var Promise = require('promise');
+
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
+var cors=require('cors');
 // stripe.setTimeout(20000);
 
 var app = express();
-// app.use(bodyParser.json());
-// app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
+var transporter = nodemailer.createTransport(smtpTransport({
+    service: 'gmail',
+    auth: {
+        user: 'abhijeet.k.dandekar@gmail.com',
+        pass: 'Ride@123*'
+    }
+}));
 
 app.set('port', (process.env.PORT || 8080));
-
+app.use(cors);
 var server = app.listen(app.get('port'), function () {
     // var port = server.address().port;
 
@@ -172,22 +177,17 @@ app.post('/trial_subscription', bodyParser, function (req, res) {
 
 // invoice_payment_successed
 
-
-
-
 app.post('/stripe-webhook', bodyParser, function (request, response) {
 
     switch (request.body.type) {
         case 'customer.deleted':
             response.send('OK');
-
             break;
-
         case 'customer.subscription.trial_will_end':
-            sendmail(request.body).then(function (resolve) {
-                response.send({'response':request.body})
+            sendmail_trial_ends(request.body).then(function (resolve) {
+                response.send(resolve)
             }, function (reject) {
-                response.send('error while sending email')
+                response.send(reject)
 
             })
             break;
@@ -201,19 +201,35 @@ app.post('/stripe-webhook', bodyParser, function (request, response) {
 
 });
 
-
-
-let sendmail = function (data) {
+let sendmail_trial_ends = function (data) {
     return new Promise(function (resolve, reject) {
-        var emailSend = true;
-        if (emailSend) {
-            resolve('email send');
-        } else {
-            reject('error while sending email');
-        }
+        var customerId = data.customer;
+        stripe.customers.retrieve(
+            customerId,
+            function (err, customer) {
+                if (err) {
+                    reject({ "error": err });
+                }
+                if (customer) {
+                    var mailOptions = {
+                        from: 'abhijeet.k.dandekar@gmail.com',
+                        to: customer.email,
+                        subject: 'End of Trial Period',
+                        html: 'You account will be charged automatically within 3 days. If you like to cancel the subscription please click here.'
+
+                    };
+                    transporter.sendMail(mailOptions, function (error, info) {
+                        if (error) {
+                            reject({ "error sendMail ": error });
+                        } else {
+                            resolve({ "response": info });
+                        }
+                    });
+
+                }
+            }
+        );
     })
-
-
 
 }
 
