@@ -171,21 +171,43 @@ app.post('/trial_subscription', bodyParser, function (req, res) {
 
 // invoice_payment_successed
 
-app.post('/invoice_payment_successed', bodyParser, function (req, res) {
-    const endpointSecret = "whsec_TLjtDyPMwnyiZM6CObp4cPly7bSjTuSg";
-
-    let sig = req.headers["stripe-signature"];
-    let event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-
-    console.log('invoice_payment_successed', JSON.stringify(req.body))
-    res.json({ received: true });
-
-});
 
 
-app.post('/stripe-webhook', bodyParser,function (request, response) {
-    if (request.body.type === 'customer.deleted') {
-        console.log(request.body.data.object);
+
+app.post('/stripe-webhook', bodyParser, function (request, response) {
+
+    switch (request.body.type) {
+        case 'customer.deleted':
+            response.send('OK');
+
+            break;
+
+        case 'customer.subscription.trial_will_end':
+
+
+            sendemail(request);
+
+
+          
+
+            break;
+
+        default:
+
+
+
+            break;
+
+
+
     }
-    response.send('OK');
+
 });
+
+
+
+
+function sendemail(data) {
+
+    response.send({"email":"kindly check you email id","data":data});
+}
