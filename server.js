@@ -43,12 +43,6 @@ function handleError(res, reason, message, code) {
 }
 
 
-app.get('/customer', function (req, res) {
-    console.log('/customer');
-    res.send({ 'test': 'comepeplted' });
-
-
-})
 
 app.post('/customer', bodyParser, function (req, res) {
     console.log('customer', JSON.stringify(req.body))
@@ -56,6 +50,22 @@ app.post('/customer', bodyParser, function (req, res) {
     stripe.customers.create({
         email: req.body.email
     }, function (err, success) {
+        if (err) {
+            console.log('error', err)
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            console.log('success')
+            // res.status(201).json(doc.ops[0]);
+            res.send({ 'status': true, "success": success });
+        }
+
+    });
+});
+app.post('/customer_details', bodyParser, function (req, res) {
+    console.log('customer', JSON.stringify(req.body.customer))
+
+    stripe.customers.retrieve(req.body.customer, function (err, success) {
         if (err) {
             console.log('error', err)
             res.send({ 'status': false, "err": err });
