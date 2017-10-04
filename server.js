@@ -8,7 +8,7 @@ var Promise = require('promise');
 
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
-var cors=require('cors');
+var cors = require('cors');
 // stripe.setTimeout(20000);
 
 var app = express();
@@ -21,7 +21,7 @@ var transporter = nodemailer.createTransport(smtpTransport({
 }));
 
 app.set('port', (process.env.PORT || 8080));
-app.use(cors);
+app.use(cors())
 var server = app.listen(app.get('port'), function () {
     // var port = server.address().port;
 
@@ -32,6 +32,7 @@ var server = app.listen(app.get('port'), function () {
 // apis end points will be here
 
 app.get('/', function (req, res) {
+    console.log('root')
     res.send('connection succesfully');
 });
 
@@ -67,6 +68,11 @@ app.post('/customer', bodyParser, function (req, res) {
 
     });
 });
+
+// app.get('/customer_seller', function (req, res) {
+//     console.log('customer_seller')
+//     res.send('customer')
+// })
 
 
 app.post('/customer_seller', bodyParser, function (req, res) {
@@ -150,6 +156,31 @@ app.post('/subscription', bodyParser, function (req, res) {
         }
     });
 });
+
+
+app.post('/update_subsciption', bodyParser, function (req, res) {
+    console.log('subscription', JSON.stringify(req.body))
+
+    var subscription = stripe.subscriptions.retrieve(req.body.subcription).then(function (response) {
+        var item_id = response.items.data[0].id;
+        stripe.subscriptions.update(req.body.subcription, {
+            items: [{
+                id: item_id,
+                plan: req.body.plan,
+            }],
+        }, function (err, success) {
+
+            if (err) {
+                res.send({ 'status': false, "err": err });
+            }
+            if (success) {
+                res.send({ 'status': true, "success": success });
+            }
+        });
+    });
+
+});
+
 
 app.post('/trial_subscription', bodyParser, function (req, res) {
     console.log('trial_subscription', JSON.stringify(req.body))
