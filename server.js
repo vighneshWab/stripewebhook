@@ -79,10 +79,10 @@ app.post('/customer_details', bodyParser, function (req, res) {
     });
 });
 
-// app.get('/customer_seller', function (req, res) {
-//     console.log('customer_seller')
-//     res.send('customer')
-// })
+app.get('/customer_seller/:id', function (req, res) {
+    console.log('customer_seller', req.params.id)
+    res.send('customer')
+})
 
 
 app.post('/customer_seller', bodyParser, function (req, res) {
@@ -109,7 +109,7 @@ app.post('/plans', bodyParser, function (req, res) {
         name: req.body.data.UserRole,
         id: req.body.id,
         interval: "month",
-        currency: "usd",
+        currency: "aud",
         amount: req.body.data.price,
     }, function (err, success) {
         if (err) {
@@ -158,6 +158,19 @@ app.post('/subscription', bodyParser, function (req, res) {
         ],
     }, function (err, success) {
 
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
+
+app.get('/cancel_subscription/:id', bodyParser, function (req, res) {
+    console.log('cancel_subscription', req.params.id);
+    var subId = req.params.id;
+    stripe.subscriptions.del(subId.toString(), function (err, success) {
         if (err) {
             res.send({ 'status': false, "err": err });
         }
@@ -252,11 +265,15 @@ let sendmail_trial_ends = function (data) {
                     reject({ "error": err });
                 }
                 if (customer) {
+                    var subsciption_id = customer
+
+                    var host = "http://localhost:3000/cancel_subsciption/" + subsciption_id;
+                    var host = "https://advertismentboard-a4a11.firebaseapp.com/" + subsciption_id;
                     var mailOptions = {
                         from: 'abhijeet.k.dandekar@gmail.com',
                         to: customer.email,
                         subject: 'End of Trial Period',
-                        html: 'You account will be charged automatically within 3 days. If you like to cancel the subscription please click here.'
+                        html: 'You account will be charged automatically within 3 days. If you like to cancel the subscription please click here <pre> ' + subsciption_id + '</pre>'
 
                     };
                     transporter.sendMail(mailOptions, function (error, info) {
