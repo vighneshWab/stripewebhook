@@ -5,6 +5,16 @@ var bodyParser = require('body-parser').json();
 
 var stripe = require('stripe')("sk_test_o582mFkZFmS94mvRLtlhWcFx");
 var Promise = require('promise');
+var admin = require('firebase-admin');
+
+// var serviceAccount = require("key/serviseAccount.json");
+
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//     databaseURL: "https://advertismentboard-a4a11.firebaseio.com"
+// })
+
+console.log(admin.name)
 
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
@@ -175,6 +185,7 @@ app.get('/cancel_subscription/:id', bodyParser, function (req, res) {
             res.send({ 'status': false, "err": err });
         }
         if (success) {
+
             res.send({ 'status': true, "success": success });
         }
     });
@@ -257,7 +268,8 @@ app.post('/stripe-webhook', bodyParser, function (request, response) {
 
 let sendmail_trial_ends = function (data) {
     return new Promise(function (resolve, reject) {
-        var customerId = data.customer;
+        var customerId = data.data.object.customer;
+        console.log(customerId)
         stripe.customers.retrieve(
             customerId,
             function (err, customer) {
@@ -265,15 +277,20 @@ let sendmail_trial_ends = function (data) {
                     reject({ "error": err });
                 }
                 if (customer) {
-                    var subsciption_id = customer
+                    var subsciption_id = customer.subscriptions.data[0].id;
 
-                    var host = "http://localhost:3000/cancel_subsciption/" + subsciption_id;
-                    var host = "https://advertismentboard-a4a11.firebaseapp.com/" + subsciption_id;
+                    console.log('subsciption_id', subsciption_id)
+
+                    // resolve({ "response": customer });
+                    // var host = "http://localhost:3000/cancel_subsciption/" + subsciption_id;
+                    var host = "https://advertismentboard-a4a11.firebaseapp.com/cancel_subsciption/" + subsciption_id;
+
+                    var clickhere = "<a href='" + host + "'> Click Here </a>"
                     var mailOptions = {
                         from: 'abhijeet.k.dandekar@gmail.com',
                         to: customer.email,
                         subject: 'End of Trial Period',
-                        html: 'You account will be charged automatically within 3 days. If you like to cancel the subscription please click here <pre> ' + subsciption_id + '</pre>'
+                        html: 'You account will be charged automatically within 3 days. If you like to cancel the subscription please click here ' + clickhere
 
                     };
                     transporter.sendMail(mailOptions, function (error, info) {
@@ -291,6 +308,34 @@ let sendmail_trial_ends = function (data) {
 
 }
 
+app.delete('/plans/:id', bodyParser, function (req, res) {
+    console.log('Plan deleted', req.params.id);
+    var subId = req.params.id;
+    stripe.plans.del(subId.toString(), function (err, success) {
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
+
+
+app.delete('/customer/:id', bodyParser, function (req, res) {
+    console.log('Plan customers', req.params.id);
+    var subId = req.params.id;
+    stripe.customers.del(subId.toString(), function (err, success) {
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
 
 
 
