@@ -156,6 +156,101 @@ app.post('/sources', bodyParser, function (req, res) {
     });
 });
 
+app.post('/create_source', bodyParser, function (req, res) {
+    console.log('create_source', JSON.stringify(req.body))
+    var customer = req.body.customer;
+    var source = req.body.source;
+
+    stripe.customers.createSource(
+        customer,
+        { source: source },
+        function (err, success) {
+            if (err) {
+                res.send({ 'status': false, "err": err });
+
+            }
+            if (success) {
+                res.send({ 'status': true, "success": success });
+            }
+        }
+    );
+
+
+});
+
+app.post('/defult_source', bodyParser, function (req, res) {
+    console.log('defult_source')
+    var customer = req.body.customer;
+    var source = req.body.source;
+
+    stripe.customers.update(
+        customer,
+        {
+            default_source: source
+        },
+        function (err, success) {
+            if (err) {
+                res.send({ 'status': false, "err": err });
+
+            }
+            if (success) {
+                res.send({ 'status': true, "success": success });
+            }
+        }
+    );
+
+
+});
+
+
+app.post('/defult_source_card', bodyParser, function (req, res) {
+    console.log('defult_source')
+    var customer = req.body.customer;
+    var source = req.body.source;
+
+    stripe.customers.update(
+        customer,
+        {
+            default_card: source
+        },
+        function (err, success) {
+            if (err) {
+                res.send({ 'status': false, "err": err });
+
+            }
+            if (success) {
+                res.send({ 'status': true, "success": success });
+            }
+        }
+    );
+
+
+});
+
+
+
+app.post('/upcoming_invoice', bodyParser, function (req, res) {
+    console.log('create_source', JSON.stringify(req.body))
+    var customer = req.body.customer;
+    var token = req.body.token;
+
+    stripe.customers.createSource(
+        customer,
+        { source: token },
+        function (err, success) {
+            if (err) {
+                res.send({ 'status': false, "err": err });
+
+            }
+            if (success) {
+                res.send({ 'status': true, "success": success });
+            }
+        }
+    );
+
+
+});
+
 
 app.post('/subscription', bodyParser, function (req, res) {
     console.log('subscription', JSON.stringify(req.body))
@@ -214,6 +309,8 @@ app.post('/update_subsciption', bodyParser, function (req, res) {
     });
 
 });
+
+
 
 
 app.post('/trial_subscription', bodyParser, function (req, res) {
