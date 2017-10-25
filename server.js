@@ -234,9 +234,8 @@ app.post('/upcoming_invoice', bodyParser, function (req, res) {
     var customer = req.body.customer;
     var token = req.body.token;
 
-    stripe.customers.createSource(
-        customer,
-        { source: token },
+    stripe.invoices.list(
+        { limit: 100 },
         function (err, success) {
             if (err) {
                 res.send({ 'status': false, "err": err });
