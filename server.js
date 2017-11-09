@@ -9,7 +9,6 @@ admin.initializeApp({
         "projectId": "advertismentboard-a4a11",
         "clientEmail": "firebase-adminsdk-tmypg@advertismentboard-a4a11.iam.gserviceaccount.com",
         "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCmcn3flj8RxsVD\nGCsQLszdh+OUH/k3SmH+o0MiP1tb0a5gLkR2DGRFGypWfzxp+O8kioUv6uFTeqip\nh+7ip2Bp1pcap4ESD5oZ6RngTlzuydaUJ7sX0lM1585PvJ756h+hWo8I/qKDKybX\n37TtmNJhFjA1AT8yEYXTbAnnJOSCLKmi8cbo0rTs45fJ5Bn54+SML4i0uOSYz/Ga\nXV15oZ/xEALx3ZvVgPnlRAvNiUqL++1pHctt18lWG3k7PBz3D5Pop03AuCnLuc0T\nZ809SmgAlP/oQGJYleQXKyj7coHQSxLhQxzzlhEMlAwHiOygrrBA4HnwDBG/7HI3\n2e/QW6MTAgMBAAECggEAM3xW00J2X9lMS2S+bVMMq7nM+5SoUiIADfQSYBWY/N3v\nQnENXDaZDYdJoVfaKC2IS5VNfXT6HghjA424pwN/Hz3xn50Qn7WTxVAFYQzcUkC8\nzzc6+DNm6dW6S4/c3RE+l3qbo/yf6FMAwOXB4XzUFpP2dW7dTW9+JdfVeFpBFMKc\nQQTk9kQhJdeLn2bXe3XuG/7P1740gaxIvIJD4mMwN9dXDRGUoX2UakrEzVITnLUT\n6BcHQ0Zz1UgDcvWDoSojAnqcRklihJI6UcDUKskjgrFLJ3GmR21pJymAy+NTHxpX\nTBG0OLPfua+Zme8UrlnCILx302KyBitd1KHWw8cVgQKBgQDQM9bxn68TuGGPnDJs\nTRcTmyQUeJl4dxcL3UpAr3EMuMMFpgMB3+xXOPWSLFF8Q95xslvU4OjulF1M5LO7\neR6MvCvALHZrlDMiiGYpPSUJwJlK2vrkvuP2EsmMqVPDfvgpQEFtCG+ZSG+zXAn4\nZ1K5/EZTqg2OJv+nfkQVIwhujwKBgQDMqKzXXgmsZOQCOzNPFeZbHvMO7InzghdT\nizsdIploPt99vuojUOFXNU7kAlF0YkWvEiYwaMtn19GpeMS2EUQEyrgvNZ/9fCnw\nM2CHxMbUTQ5SvoLxdrGEsLK8LUto0ai0NMuIlsrU8WkAqCdH5/OycrAQp9tJ5ovB\nofMO8AeFPQKBgFkFsWRC+OMftWdoTA8Or01MypKONmDR2uLRzcv2uAnOfmTN5P9K\nNY3d5vKHTJgrlNNchfNx72cDvRkBuO/yC+P1GWfkGwZIqcycMcJ0SH/xABqHoztn\ne6VdxxwD0rMGeSl6Nf9e2gjadhhkxEaYN0Ea4x8m2QDtH+cIEChRgGt1AoGBAMZ2\nl83t+lF8MQPc5t+9a/pXI/sH9Kr4L6irbvLM95j4x3/IYINIzozkPBGuEdFb7xlb\n7z6okP+tcTr3y0KHsb832q6lQPXurzioieZ/MxTzeH1TE+YWZQU42MrU3bjS/9dp\nDyrwl9cyF9I0PotjapZU01oDfQrIECUA6JRGvfQ9AoGBAJ44Hy0gyD4PLTviyY6p\n2o/d2uZCwEn3FQfdOxBiZEqayrfUUp4MfHdiRAb87uID/i5HTim5gChboGY3R/FM\n4OYWaJpPDHqTronMZWwaVP0oi0N3NsNcYbQoFuVQR/BZCdRmHl7ttlfV4FoWTbbJ\nzJlHPMdKcyof6S4JzJJQr7Vb\n-----END PRIVATE KEY-----\n",
-
     }),
     databaseURL: "https://advertismentboard-a4a11.firebaseio.com"
 })
@@ -35,7 +34,6 @@ app.set('port', (process.env.PORT || 8080));
 app.use(cors())
 var server = app.listen(app.get('port'), function () {
     // var port = server.address().port;
-
     console.log("App now running on port", new Date().toLocaleString());
 });
 
@@ -73,6 +71,32 @@ app.post('/customer', bodyParser, function (req, res) {
 
     });
 });
+
+
+
+app.post('/changes', bodyParser, function (req, res) {
+    stripe.charges.create({
+        amount: req.body.amount,
+        currency: "aud",
+        description: req.body.description,
+        source: req.body.source,
+        // customer: req.body.customer
+    }, function (err, success) {
+        if (err) {
+            console.log('error', err)
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            console.log('success')
+            // res.status(201).json(doc.ops[0]);
+            res.send({ 'status': true, "success": success });
+        }
+
+    });
+});
+
+
+
 app.post('/customer_details', bodyParser, function (req, res) {
     stripe.customers.retrieve(req.body.customer, function (err, success) {
         if (err) {
@@ -258,6 +282,23 @@ app.post('/subscription', bodyParser, function (req, res) {
             },
         ],
     }, function (err, success) {
+
+        if (err) {
+            res.send({ 'status': false, "err": err });
+        }
+        if (success) {
+            res.send({ 'status': true, "success": success });
+        }
+    });
+});
+
+
+
+
+app.get('/subscription/:id', bodyParser, function (req, res) {
+    console.log('retirve subscription', req.params.id);
+    var subId = req.params.id;
+    stripe.subscriptions.retrieve(subId.toString(), function (err, success) {
 
         if (err) {
             res.send({ 'status': false, "err": err });
@@ -457,7 +498,6 @@ let sendmail_trial_ends = function (data) {
                 }
                 if (customer) {
                     var subsciption_id = customer.subscriptions.data[0].id;
-
                     console.log('subsciption_id', subsciption_id)
 
                     // resolve({ "response": customer });
